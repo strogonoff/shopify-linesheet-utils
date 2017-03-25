@@ -19,6 +19,8 @@ func (s ProductSet) LSEntry() LSEntry {
 
 	e["setName"] = s.name
 
+	e["@setPhoto"] = idPath(s.picturePath)
+
 	var useBigImage bool = s.maxVariantCount() == 1
 
 	var numColumns int
@@ -34,8 +36,9 @@ func (s ProductSet) LSEntry() LSEntry {
 		pCell int = 1
 	)
 
-	if useBigImage {
-		e["@r1_p1_BigPhoto"] = idPath(s.products[0].variants[0].picturePath)
+	firstVariantImage := s.products[0].variants[0].picturePath
+	if useBigImage && firstVariantImage != "" {
+		e["@r1_p1_BigPhoto"] = idPath(firstVariantImage)
 	}
 
 	for pIdx, p := range s.products {
@@ -43,21 +46,42 @@ func (s ProductSet) LSEntry() LSEntry {
 			log.Fatal("Product has more than 6 variants!", s.handle)
 		}
 
-		e[fmt.Sprintf("r%d_p%d_Product", row, pCell)] = p.name
-		e[fmt.Sprintf("r%d_p%d_Price", row, pCell)] = fmt.Sprintf("$%s", p.wholesalePrice)
+		e[fmt.Sprintf("r%d_p%d_Product", row, pCell)] = fmt.Sprintf("%s	$%s",
+			p.name,
+			p.wholesalePrice)
 
-		var vCell int = 1
+		//e[fmt.Sprintf("r%d_p%d_Product", row, pCell)] = p.name
+		//e[fmt.Sprintf("r%d_p%d_Price", row, pCell)] = fmt.Sprintf("$%s", p.wholesalePrice)
 
-		for vIdx, v := range p.variants {
-			e[fmt.Sprintf("r%d_pv%d_Color", row, vCell)] = v.color
-			e[fmt.Sprintf("r%d_pv%d_Sku", row, vCell)] = v.sku
-			e[fmt.Sprintf("@r%d_pv%d_Photo", row, vCell)] = idPath(v.picturePath)
+		nextProductStartsNewRow := startNewRow(pIdx, numColumns)
 
-			if vIdx == 0 && numColumns == 2 {
-				vCell = 2
+		var vCell int
+		if row != 1 && numColumns == 2 && nextProductStartsNewRow {
+			vCell = 2
+		} else {
+			vCell = 1
+		}
+
+		for _, v := range p.variants {
+			var sku, color, photo string
+
+			sku = fmt.Sprintf(" %s ", v.sku)
+			if v.color != "" {
+				color = v.color
 			} else {
-				vCell += 1
+				color = "-"
 			}
+			if v.picturePath != "" {
+				photo = idPath(v.picturePath)
+			} else {
+				photo = ""
+			}
+
+			e[fmt.Sprintf("r%d_pv%d_Sku", row, vCell)] = sku
+			e[fmt.Sprintf("r%d_pv%d_Color", row, vCell)] = color
+			e[fmt.Sprintf("@r%d_pv%d_Photo", row, vCell)] = photo
+
+			vCell += 1
 		}
 
 		// If needed, inc row and product cell after processing product.
@@ -68,14 +92,14 @@ func (s ProductSet) LSEntry() LSEntry {
 			if pIdx < 1 {
 				row += 2
 				pCell = 1
-			} else if startNewRow(pIdx-1, numColumns) {
+			} else if nextProductStartsNewRow {
 				row += 1
 				pCell = 1
 			} else {
 				pCell += 1
 			}
 		} else {
-			if startNewRow(pIdx, numColumns) {
+			if nextProductStartsNewRow {
 				row += 1
 				pCell = 1
 			} else {
@@ -100,6 +124,7 @@ func idPath(path string) string {
 func LSEntryCSVFields() []string {
 	return []string{
 		"setName",
+		"@setPhoto",
 		"r1_p1_Product",
 		"r1_p1_Price",
 		"@r1_p1_BigPhoto",
