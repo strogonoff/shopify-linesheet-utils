@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"strconv"
 	"strings"
 )
 
@@ -36,10 +39,23 @@ func (sr ShopifyRecord) ProductSet() ProductSet {
 	return s
 }
 
-func (sr ShopifyRecord) Product() Product {
+func (sr ShopifyRecord) Product(wholesaleDiscountFactor float64) Product {
+	var (
+		retailPrice, wholesalePrice float64
+	)
+
+	retailPrice, err := strconv.ParseFloat(sr.vPrice, 32)
+	if err != nil {
+		log.Fatal("Error converting price to floating point", sr)
+	}
+
+	_exactPrice := retailPrice * wholesaleDiscountFactor
+
+	wholesalePrice = RoundPlus(_exactPrice, 2)
+
 	p := Product{
 		name:           sr.oProductType,
-		wholesalePrice: sr.vPrice,
+		wholesalePrice: fmt.Sprintf("%.2f", wholesalePrice),
 	}
 	return p
 }
@@ -56,10 +72,10 @@ func (sr ShopifyRecord) ProductVariant() ProductVariant {
 /* Abstracting sets/products/variants */
 
 type ProductSet struct {
-	handle   string
-	name     string
-	products []Product
-	picturePath	string
+	handle      string
+	name        string
+	products    []Product
+	picturePath string
 }
 
 func (s ProductSet) maxVariantCount() int {

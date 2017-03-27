@@ -8,15 +8,28 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
 func main() {
 	args := os.Args[1:]
 
+	if len(args) != 4 {
+		log.Fatal("Exactly four arguments are expected: in file, out file, discount factor and asset root path")
+	}
+
 	var IN_FILENAME = args[0]
 	var OUT_FILENAME = args[1]
-	var ASSET_ROOT_PATH = args[2]
+	var ASSET_ROOT_PATH = args[3]
+
+	_discount := args[2]
+
+	WHOLESALE_DISCOUNT_FACTOR, err := strconv.ParseFloat(_discount, 32)
+
+	if err != nil {
+		log.Fatal("Unable to convert specified discount factor to floating point type")
+	}
 
 	log.Println(fmt.Sprintf("Reading Shopify records from %s...", IN_FILENAME))
 
@@ -111,7 +124,7 @@ func main() {
 			if !_startsSet {
 				curSet.products = append(curSet.products, curProduct)
 			}
-			curProduct = curRecord.Product()
+			curProduct = curRecord.Product(WHOLESALE_DISCOUNT_FACTOR)
 			//log.Println("-- added product", curProduct.name)
 		}
 
