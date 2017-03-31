@@ -4,7 +4,31 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"errors"
 )
+
+// Line sheet layouts
+
+type Layout struct {
+	numColumns int
+	useBigImage bool
+}
+
+func (s ProductSet) Layout() (Layout, error) {
+	var nProducts = len(s.products)
+	var nVariants = s.maxVariantCount()
+
+	switch {
+	case nProducts == 1 && nVariants == 1:
+		return Layout{1, true}, nil
+	case nProducts > 1 && nVariants == 1:
+		return Layout{2, true}, nil
+	case nProducts > 1 && nProducts <= 4 && nVariants <= 6:
+		return Layout{1, false}, nil
+	}
+
+	return Layout{1, false}, errors.New("Product/variant count unsupported")
+}
 
 // InDesign line sheet data entry.
 // Field names should correspond to data merge placeholders in corresponding
@@ -15,21 +39,19 @@ type LSEntry map[string]string
 
 // Returns line sheet entry created from given product set
 func (s ProductSet) LSEntry() LSEntry {
+
+	layout, err := s.Layout()
+
+	if err != nil {
+		log.Fatal(fmt.Sprintf("Unable to determine layout for product set %s: %s",
+			s.handle, err))
+	}
+
 	e := LSEntry{}
 
 	e["setName"] = s.name
 
 	e["@setPhoto"] = idPath(s.picturePath)
-
-	var useBigImage bool = s.maxVariantCount() == 1
-
-	var numColumns int
-
-	if s.maxVariantCount() < 3 {
-		numColumns = 2
-	} else {
-		numColumns = 1
-	}
 
 	var (
 		row   int = 1
@@ -37,7 +59,7 @@ func (s ProductSet) LSEntry() LSEntry {
 	)
 
 	firstVariantImage := s.products[0].variants[0].picturePath
-	if useBigImage && firstVariantImage != "" {
+	if layout.useBigImage == true && firstVariantImage != "" {
 		e["@r1_p1_BigPhoto"] = idPath(firstVariantImage)
 	}
 
@@ -53,10 +75,10 @@ func (s ProductSet) LSEntry() LSEntry {
 		//e[fmt.Sprintf("r%d_p%d_Product", row, pCell)] = p.name
 		//e[fmt.Sprintf("r%d_p%d_Price", row, pCell)] = fmt.Sprintf("$%s", p.wholesalePrice)
 
-		nextProductStartsNewRow := startNewRow(pIdx, numColumns)
+		nextProductStartsNewRow := startNewRow(pIdx, layout.numColumns)
 
 		var vCell int
-		if row != 1 && numColumns == 2 && nextProductStartsNewRow {
+		if row != 1 && layout.numColumns == 2 && nextProductStartsNewRow {
 			vCell = 2
 		} else {
 			vCell = 1
@@ -90,7 +112,7 @@ func (s ProductSet) LSEntry() LSEntry {
 		// If using two columns, start rows after products with even indexes.
 		// If also using big image, skip second row,
 		// and start rows after products with odd indexes.
-		if useBigImage {
+		if layout.useBigImage {
 			if pIdx < 1 {
 				row += 2
 				pCell = 1
