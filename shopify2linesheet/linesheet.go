@@ -238,6 +238,11 @@ func LSEntryCSVFields() []string {
 		"r4_pv6_Color",
 		"r4_pv6_Sku",
 		"@r4_pv6_Photo",
+
+
+		// These are not going to be used but removing these fields
+		// from CSV crashes InDesign's data merge even if all
+		// corresponding placeholders are removed also.
 		"r5_p1_Product",
 		"r5_p1_Price",
 		"r5_p2_Product",
