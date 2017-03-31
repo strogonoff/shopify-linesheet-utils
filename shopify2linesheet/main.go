@@ -173,7 +173,7 @@ func main() {
 		record := []string(csvEntry)
 
 		if err := csvWriter.Write(record); err != nil {
-			log.Fatalln("Error writing record to CSV:", err)
+			log.Fatalln("Error writing record to CSV: ", err)
 		}
 	}
 

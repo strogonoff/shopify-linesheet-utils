@@ -43,7 +43,7 @@ func (s ProductSet) LSEntry() LSEntry {
 
 	for pIdx, p := range s.products {
 		if len(p.variants) > 6 {
-			log.Fatal("Product has more than 6 variants!", s.handle)
+			log.Fatal("Layout supports at most 6 variants per product: ", s.handle)
 		}
 
 		e[fmt.Sprintf("r%d_p%d_Product", row, pCell)] = fmt.Sprintf("%s	$%s",
