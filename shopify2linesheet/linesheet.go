@@ -66,11 +66,13 @@ func (s ProductSet) LSEntry() LSEntry {
 			var sku, color, photo string
 
 			sku = fmt.Sprintf(" %s ", v.sku)
+
 			if v.color != "" {
 				color = v.color
 			} else {
 				color = "-"
 			}
+
 			if v.picturePath != "" {
 				photo = idPath(v.picturePath)
 			} else {
