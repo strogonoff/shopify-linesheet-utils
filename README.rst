@@ -3,6 +3,15 @@ a CSV ready for data merge into InDesign-created catalog.
 
 Currently support one specific catalog design.
 
+Why
+===
+
+If creating a fully custom catalog and stock Shopify
+line sheet exporter doesn’t cut it, using this
+in conjunction with Adobe InDesign
+allows for quick iteration over catalog design
+without manually entering every product’s data.
+
 Limitations
 ===========
 
