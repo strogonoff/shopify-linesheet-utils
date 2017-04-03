@@ -1,8 +1,7 @@
-This program, codenamed shopify2linesheet, allows to create
-a wholesale line sheet from a Shopify store in semi-automatic mode.
+This program takes a Shopify store CSV dump and produces
+a CSV ready for data merge into InDesign-created catalog.
 
-It processes Shopify product dump into a CSV suitable for a data merge
-into an InDesign project with appropriate catalog layout.
+Currently support one specific catalog design.
 
 Limitations
 ===========
@@ -27,13 +26,6 @@ where the maximum number of variants for any product is 6;
 or it expects not more than 8 products per set with a maximum of 1 variant
 per product.
 
-What this program does
-======================
-
-This program reads CSV from Shopify, where rows correspond to product variants,
-and writes a CSV for InDesign data merge, where each row corresponds
-to a page with one line sheet entry.
-
 Workflow
 ========
 
@@ -45,6 +37,10 @@ Workflow
 
    where the arguments are:
    input file, output file, wholesale discount factor, and product image path.
+   
+   Wait for the program to finish downloading product photography.
+   It won’t download product image when it sees that the file with the same
+   name already exists.
 
 3. In the InDesign project, open Data Merge panel and select 
    ``linesheetdata.csv`` as data source.
