@@ -1,8 +1,42 @@
-This program, codenamed shopify2linesheet, allows to create
-a wholesale line sheet from a Shopify store in semi-automatic mode.
+NOTE: No support for arbitrary Shopify stores
+and catalog designs. This probably won’t work for you.
 
-It processes Shopify product dump into a CSV suitable for a data merge
-into an InDesign project with appropriate catalog layout.
+Rationale
+=========
+
+If creating a fully custom catalog and stock Shopify
+line sheet exporter doesn’t cut it, using this
+in conjunction with Adobe InDesign
+allows for quick iteration over catalog design
+without manually entering every product’s data.
+
+Functionality
+=============
+
+Takes a Shopify store CSV dump and produces
+a CSV ready for data merge into InDesign-created catalog.
+
+Workflow
+========
+
+1. Export Shopify data into CSV
+
+2. Assuming Go runtime is installed on the machine::
+
+      go run src/shopify2linesheet/*.go shopifydata.csv linesheetdata.csv  0.45 /Users/path/to/asset/directory
+
+   where the arguments are:
+   input file, output file, wholesale discount factor, and product image path.
+
+   Product image path must be an existing directory.
+
+   It won’t download product image if it sees that the file with the same
+   name already exists under product image path.
+
+3. In InDesign project, open Data Merge panel and select 
+   ``linesheetdata.csv`` as data source.
+
+4. Proceed as normal: create merged document, adjust layout, publish.
 
 Limitations
 ===========
@@ -26,36 +60,3 @@ Line sheet page layout is such that it expects not more than 4 products per set,
 where the maximum number of variants for any product is 6;
 or it expects not more than 8 products per set with a maximum of 1 variant
 per product.
-
-What this program does
-======================
-
-This program reads CSV from Shopify, where rows correspond to product variants,
-and writes a CSV for InDesign data merge, where each row corresponds
-to a page with one line sheet entry.
-
-Workflow
-========
-
-1. Export your Shopify data into CSV
-
-2. Assuming you have Go runtime installed::
-
-      go run src/shopify2linesheet/*.go shopifydata.csv linesheetdata.csv  0.45 /Users/path/to/asset/directory
-
-   where the arguments are:
-   input file, output file, wholesale discount factor, and product image path.
-   Product image path must be an existing directory.
-
-3. In the InDesign project, open Data Merge panel and select 
-   ``linesheetdata.csv`` as data source.
-
-4. Proceed as normal: create merged document, adjust layout, publish.
-
-To do
-=====
-
-* Separate configuration from hard-coded Shopify CSV parsing logic
-  to allow supporting arbitrary Shopify stores.
-* Separate configuration from hard-coded line sheet CSV export logic
-  to allow supporting arbitrary line sheet layouts.
