@@ -45,6 +45,7 @@ Workflow
 
    where the arguments are:
    input file, output file, wholesale discount factor, and product image path.
+   Product image path must be an existing directory.
 
 3. In the InDesign project, open Data Merge panel and select 
    ``linesheetdata.csv`` as data source.
