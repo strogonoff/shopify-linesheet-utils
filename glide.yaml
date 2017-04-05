@@ -1,0 +1,6 @@
+package: .
+import:
+- package: golang.org/x/text
+  subpackages:
+  - encoding/unicode
+  - transform
